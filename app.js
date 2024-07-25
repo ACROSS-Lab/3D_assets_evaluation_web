@@ -282,8 +282,15 @@ app.get('/serve-gif/:folder/:gifName', (req, res) => {
     });
 });
 
-app.get('/export-csv', (req, res) => {
-    db.all("SELECT * FROM evaluations", [], (err, rows) => {
+app.get('/export-csv', isLoggedIn, (req, res) => {
+    const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
+        if (err) {
+            console.error('Error opening database', err.message);
+            return res.status(500).send("Error accessing the database");
+        }
+    });
+
+    db.all("SELECT * FROM "+process.env.DB_TABLE_NAME, [], (err, rows) => {
         if (err) {
             res.status(400).send("Error fetching records: " + err.message);
             return;

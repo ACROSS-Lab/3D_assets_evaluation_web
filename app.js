@@ -9,7 +9,7 @@ const flash = require('connect-flash');
 
 
 // Configuration de la base de données
-let db = new sqlite3.Database('./evaluations.db', sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
+let db = new sqlite3.Database(path.join(path.join(__dirname, "db"), 'evaluations.db'), sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
     if (err) {
         return console.error(err.message);
     }
@@ -298,7 +298,7 @@ app.get('/export-csv', (req, res) => {
 });
 
 app.get('/across-lab', isLoggedIn, (req, res) => {
-    const dbPath = path.join(__dirname, 'evaluations.db'); 
+    const dbPath = path.join(path.join(__dirname, "db"), 'evaluations.db'); 
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
         if (err) {
             console.error('Error opening database', err.message);

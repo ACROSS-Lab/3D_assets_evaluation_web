@@ -7,6 +7,8 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const flash = require('connect-flash');
 
+// Load `.env` config file
+require("dotenv").config();
 
 // Configuration de la base de données
 let db = new sqlite3.Database(path.join(path.join(__dirname, "db"), 'evaluations.db'), sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE, (err) => {
@@ -14,7 +16,7 @@ let db = new sqlite3.Database(path.join(path.join(__dirname, "db"), 'evaluations
         return console.error(err.message);
     }
     console.log('Connected to the SQlite database.');
-    db.run(`CREATE TABLE IF NOT EXISTS evaluations (
+    db.run(`CREATE TABLE IF NOT EXISTS ${process.env.DB_TABLE_NAME} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         folderName TEXT,
         gifName TEXT,
@@ -33,7 +35,7 @@ let db = new sqlite3.Database(path.join(path.join(__dirname, "db"), 'evaluations
 
 db.serialize(() => {
     // Créer une table si elle n'existe pas déjà
-    db.run(`CREATE TABLE IF NOT EXISTS evaluations (
+    db.run(`CREATE TABLE IF NOT EXISTS ${process.env.DB_TABLE_NAME} (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         folderName TEXT,
         gifName TEXT,
@@ -60,8 +62,6 @@ db.serialize(() => {
 
 function startApp() {
 
-
-
 // Initialisation de l'application Express
 const app = express();
 
@@ -71,7 +71,7 @@ app.use(express.static('public'));
 
 // Configuration de la session pour Express
 app.use(session({
-    secret: 'secret key',
+    secret: process.env.EXPRESS_SECRET_KEY,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }
@@ -102,7 +102,7 @@ fs.readFile(path.join(__dirname, 'data', 'prompts.txt'), 'utf8', (err, data) => 
 // Configurer la stratégie d'authentification
 passport.use(new LocalStrategy(
   (username, password, done) => {
-    if (username === 'across-admin' && password === 'across-lab') { // Remplacer par vos propres méthodes de validation
+    if (username === process.env.ADMIN_USERNAME && password === process.env.ADMIN_PASSWORD) { // Remplacer par vos propres méthodes de validation
       return done(null, { id: 'admin', name: 'Admin' });
     }
     return done(null, false, { message: 'Invalid credentials' });
@@ -219,7 +219,7 @@ app.post('/submit-evaluation', (req, res) => {
 
             //console.log(`Preparing to insert: Folder: ${folderName}, GIF Name: ${gifName}, Ranking: ${ranking}, Score Top Rated: ${scoreTopRated}, Score Lowest Rated: ${scoreLowestRated}`);
             
-            db.run(`INSERT INTO evaluations (folderName, gifName, ranking, scoreTopRated, scoreLowestRated) VALUES (?, ?, ?, ?, ?)`,
+            db.run(`INSERT INTO ${process.env.DB_TABLE_NAME} (folderName, gifName, ranking, scoreTopRated, scoreLowestRated) VALUES (?, ?, ?, ?, ?)`,
                 [folderName, gifName, ranking, scoreTopRated, scoreLowestRated], (err) => {
                     if (err) {
                         return console.error(err.message);
@@ -306,7 +306,7 @@ app.get('/across-lab', isLoggedIn, (req, res) => {
         }
     });
 
-    db.all("SELECT * FROM evaluations;", [], (err, rows) => {
+    db.all("SELECT * FROM "+process.env.DB_TABLE_NAME+";", [], (err, rows) => {
         if (err) {
             console.error(err.message);
             res.status(500).send("Error fetching records from the database");
@@ -342,16 +342,9 @@ app.get('/login', (req, res) => {
 
 
 // Démarrage du serveur
-const PORT = 3000;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://192.168.0.21:${PORT}`);
+app.listen(process.env.EXPRESS_PUBLIC_PORT, '0.0.0.0', () => {
+  console.log(`Server running on http://0.0.0.0:${process.env.EXPRESS_PUBLIC_PORT}`);
 });
 
-
-// Démarrage du serveur
-//const PORT = 3000;
-//app.listen(PORT, () => {
-  //  console.log(`Server running on http://localhost:${PORT}`);
-//});
 }
 

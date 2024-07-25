@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Final Decision</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <div class="header">
+        <a href="https://www.ird.fr"><img src="/images/ird.png" alt="Logo IRD"></a>
+        <a href="https://across-lab.org/"><img src="/images/ACROSS-3@3x.png" alt="Logo ACROSS"></a>
+        <a href="https://www.project-simple.eu"><img src="/images/simple.png" alt="Logo SIMPLE"></a>
+    </div>
+    <h1>Final Decision</h1>
+    <p>You have completed <%= batchCount %> batches of evaluations.</p>
+    
+    <% evaluations.forEach(function(evaluation, index) { %>
+        <div>
+            <h2>Evaluation <%= index + 1 %>: <%= evaluation.prompt %></h2>
+            <p>Top Rated Score: <%= evaluation.topRatedScore || 'Not Rated' %></p>
+            <p>Lowest Rated Score: <%= evaluation.lowestRatedScore || 'Not Rated' %></p>
+        </div>
+    <% }); %>
+
+    <% if (continueOption) { %>
+        <form action="/submit-evaluation" method="post">
+            <button type="submit" name="action" value="continue">Continue Evaluating</button>
+            <button type="submit" name="action" value="stop">Submit Evaluations</button>
+        </form>
+    <% } %>
+</body>
+</html>
+
+
+

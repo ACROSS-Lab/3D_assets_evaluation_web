@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GIFs Evaluation</title>
+    <link rel="stylesheet" href="/styles/main.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <a href="https://www.ird.fr"><img src="/images/ird.png" alt="Logo IRD"></a>
+        <a href="https://across-lab.org/"><img src="/images/ACROSS-3@3x.png" alt="Logo ACROSS"></a>
+        <a href="https://www.project-simple.eu"><img src="/images/simple.png" alt="Logo SIMPLE"></a>
+    </div>
+    <h1>GIFs Evaluation : Arrange these GIFs from 1 to 6 based on how well they align with the prompt below and assign a score to the best and the last one.</h1>
+    <h2 style="color: darkgreen;">PROMPT : <%= prompt %></h2>
+    <div id="gifs-container" class="grid-container">
+        <% gifs.forEach((gif, index) => { %>
+            <div class="gif-item" data-id="<%= index + 1 %>">
+                <span class="position-number"><%= index + 1 %></span>
+                <img src="<%= gif %>" alt="GIF <%= index + 1 %>" loop="true">
+            </div>
+        <% }); %>
+    </div>
+    
+    <form action="/submit-evaluation" method="post" id="ranking-form">
+        <div class="form-control">
+            <label for="top-rated-score" style="font-size: 20px;">Mark for the best gif:</label>
+            <input type="range" id="top-rated-score" name="topRatedScore" min="0" max="5" step="1" value="0">
+            <span id="top-rated-value">0</span>
+            <p class="slider-description">Move this slider to assign a score to the GIF you consider the best and classed first, on a scale from 0 (worst) to 5 (best).</p>
+        </div>
+       
+        <div class="form-control">
+        
+            <label for="lowest-rated-score" style="font-size: 20px;">Mark for the worst gif:</label>
+
+            <input type="range" id="lowest-rated-score" name="lowestRatedScore" min="0" max="5" step="1" value="0">
+            <span id="lowest-rated-value">0</span>
+            <p class="slider-description">Use this slider to give a score to the GIF you consider least good and classed last, also from 0 (worst) to 5 (best).</p>
+        </div>
+       
+        <div class="form-control">
+            <button type="submit" name="action" value="continue" onclick="submitRanking()">NEXT</button>
+        </div>
+    
+       
+        <input type="hidden" name="rankOrder" id="rankOrder">
+    </form>
+
+    <script>
+        var el = document.getElementById('gifs-container');
+        var sortable = new Sortable(el, {
+            animation: 150,
+            ghostClass: 'blue-background-class',
+            onUpdate: function (evt) {
+                // Met à jour les numéros de position après réarrangement
+                updatePositionNumbers();
+                // Log l'ordre chaque fois qu'un élément est déplacé
+                var order = sortable.toArray();
+                console.log("Order after rearrangement:", order);
+            }
+        });
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            var topRatedScoreSlider = document.getElementById('top-rated-score');
+            var lowestRatedScoreSlider = document.getElementById('lowest-rated-score');
+    
+            function updateValues() {
+                document.getElementById('top-rated-value').textContent = topRatedScoreSlider.value;
+                document.getElementById('lowest-rated-value').textContent = lowestRatedScoreSlider.value;
+                lowestRatedScoreSlider.max = topRatedScoreSlider.value; // Ensure lowest-rated cannot exceed top-rated
+            }
+    
+            topRatedScoreSlider.oninput = updateValues;
+            lowestRatedScoreSlider.oninput = updateValues;
+    
+            // Log initial order
+            var initialOrder = Array.from(document.querySelectorAll('.gif-item')).map(item => item.getAttribute('data-id'));
+            console.log("Initial order of GIFs:", initialOrder);
+    
+            document.getElementById('ranking-form').onsubmit = function() {
+                var finalOrder = sortable.toArray().map(function(id) {
+                    return parseInt(id, 10);
+                });
+                console.log("Final order submitted:", finalOrder);
+                document.getElementById('rankOrder').value = finalOrder.join(',');
+            };
+
+            // Initial call to set position numbers
+            updatePositionNumbers();
+        });
+
+        // Fonction pour mettre à jour les numéros de position
+        function updatePositionNumbers() {
+            var items = document.querySelectorAll('.gif-item');
+            items.forEach((item, index) => {
+                item.querySelector('.position-number').textContent = index + 1;
+            });
+        }
+    </script>
+</body>
+</html>

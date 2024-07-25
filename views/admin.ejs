@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+    <div class="header">
+        <a href="https://www.ird.fr"><img src="/images/ird.png" alt="Logo IRD"></a>
+        <a href="https://across-lab.org/"><img src="/images/ACROSS-3@3x.png" alt="Logo ACROSS"></a>
+        <a href="https://www.project-simple.eu"><img src="/images/simple.png" alt="Logo SIMPLE"></a>
+    </div>
+    <h1>Admin Panel</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Folder Name</th>
+                <th>GIF Name</th>
+                <th>Ranking</th>
+                <th>Score Top Rated</th>
+                <th>Score Lowest Rated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% data.forEach(function(item) { %>
+                <tr>
+                    <td><%= item.id %></td>
+                    <td><%= item.folderName %></td>
+                    <td><%= item.gifName %></td>
+                    <td><%= item.ranking %></td>
+                    <td><%= item.scoreTopRated %></td>
+                    <td><%= item.scoreLowestRated %></td>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+    <a href="/export-csv" download="evaluations.csv">Download the evaluation CSV file</a>
+
+</body>
+</html>
+

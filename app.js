@@ -284,7 +284,7 @@ app.get('/serve-gif/:folder/:gifName', (req, res) => {
 
 
 app.get('/export-csv', isLoggedIn, (req, res) => {
-    const dbPath = path.join(path.join(__dirname, "db"), 'evaluations.db'); 
+    const dbPath = path.join(path.join(__dirname, "db"), 'evaluations.db');
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
         if (err) {
             console.error('Error opening database', err.message);
@@ -292,28 +292,19 @@ app.get('/export-csv', isLoggedIn, (req, res) => {
         }
     });
 
-    db.all("SELECT * FROM evaluations", [], (err, rows) => {
+    db.all("SELECT * FROM "+process.env.DB_TABLE_NAME, [], (err, rows) => {
         if (err) {
             res.status(400).send("Error fetching records: " + err.message);
-            db.close();
             return;
         }
         // Convertir en CSV
         const headers = "Folder Name, GIF Name, Ranking, Score Top Rated, Score Lowest Rated\n";
         const csvContent = rows.map(row => `${row.folderName},${row.gifName},${row.ranking},${row.scoreTopRated},${row.scoreLowestRated}`).join("\n");
-        
         res.header('Content-Type', 'text/csv');
         res.attachment("evaluations.csv");
         res.send(headers + csvContent);
-
-        db.close((err) => {
-            if (err) {
-                console.error('Error closing database', err.message);
-            }
-        });
     });
 });
-
 
 app.get('/across-lab', isLoggedIn, (req, res) => {
     const dbPath = path.join(path.join(__dirname, "db"), 'evaluations.db'); 
